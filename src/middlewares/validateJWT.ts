@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel";
-import { ExtendRequest } from "../types/extendedRequest"; 
+import { ExtendRequest } from "../types/extendedRequest";
 
 const validateJWT = (req: ExtendRequest, res: Response, next: NextFunction) => {
   const authorizationHeader = req.get("authorization");
@@ -38,13 +38,16 @@ const validateJWT = (req: ExtendRequest, res: Response, next: NextFunction) => {
     // Fetch user from database based on the payload
     const user = await userModel.findOne({ email: userPayload.email });
     if (!user) {
-      res.status(404).send("User not found");
+      res.status(403).send("User not found");
       return;
     }
-
     req.user = user;
     next();
   });
+};
+
+const generateJWT = (data: any) => {
+  return jwt.sign(data, process.env.JWT_SECRET || "");
 };
 
 export default validateJWT;
